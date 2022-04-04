@@ -1,6 +1,6 @@
-# Wallet UI for Uqbar
+# Scan UI
 
-The wallet UI for the Uqbar wallet.
+The scan UI for the %scan app.
 
 ## Available Scripts
 
