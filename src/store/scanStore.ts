@@ -1,10 +1,18 @@
 import create from "zustand"
 import { SubscriptionRequestInterface } from "@urbit/http-api";
 import api from "../api";
+import { Guest } from "../types/Guest";
+import { sortGuests } from "../utils/guestList";
+
+interface CodeData {
+  code: number
+  expires_at: string
+}
 
 export interface ScanStore {
   code: number | null,
-  expiration: Date | null,
+  expiresAt: Date | null,
+  guestList: Guest[],
   init: () => Promise<void>,
   createCode: () => Promise<void>,
   verifyCode: (code: number) => Promise<void>,
@@ -22,17 +30,36 @@ export function createSubscription(app: string, path: string, e: (data: any) => 
       throw new Error('subscription clogged');
     }
   };
-  console.log('HELLo')
   // TODO: err, quit handling (resubscribe?)
   return request;
 }
 
+// '~2022.4.4..22.45.04..b1b8'
+// const d = new Date("2015-03-25T12:00:00Z");
+const parseExpiresAt = (eA: string) => eA
+  .replace('~', '')
+  .replace(/\.[0-9]+?/, m => `-${m.length === 2 ? `0${m[1]}` : m.slice(0)}`)
+  .replace(/\.[0-9]+?/, m => `-${m.length === 2 ? `0${m[1]}` : m.slice(0)}`)
+  .replace('..', 'T')
+  .replace('.', ':')
+  .replace('.', ':')
+  .replace(/\.\..*$/, 'Z')
+
 const useScanStore = create<ScanStore>((set, get) => ({
   code: null,
-  expiration: null,
+  expiresAt: null,
+  guestList: [],
   init: async () => {
-    const handleSignerUpdate = (data: any) => console.log('SIGNER UPDATE:', data)
-    const handleGuestListUpdate = (data: any) => console.log('GUEST LIST UPDATE:', data)
+    const handleSignerUpdate = ({ code, expires_at }: CodeData) => {
+      const expiresAt = new Date(parseExpiresAt(expires_at))
+      set({ code, expiresAt })
+    }
+    const handleGuestListUpdate = (data: { [key: string]: boolean }) => {
+      const guestList = Object.keys(data)
+        .map((ship) => ({ ship, confirmed: data[ship] }))
+        .sort(sortGuests)
+      set({ guestList })
+    }
 
     api.subscribe(createSubscription('scan', '/signer-updates', handleSignerUpdate))
     api.subscribe(createSubscription('scan', '/reader-updates', handleGuestListUpdate))
@@ -40,7 +67,6 @@ const useScanStore = create<ScanStore>((set, get) => ({
     get().createCode()
   },
   createCode: async () => {
-    console.log('CREATE')
     await api.poke({
       app: 'scan',
       mark: 'action',
@@ -51,7 +77,7 @@ const useScanStore = create<ScanStore>((set, get) => ({
     await api.poke({
       app: 'scan',
       mark: 'action',
-      json: { verify: code }
+      json: { verify: { code } }
     })
   },
   setGuestList: async (guestList: string[]) => {
@@ -62,11 +88,13 @@ const useScanStore = create<ScanStore>((set, get) => ({
     })
   },
   clearGuestList: async () => {
-    await api.poke({
-      app: 'scan',
-      mark: 'action',
-      json: { 'clear-guests': true }
-    })
+    if (window.confirm('Are you sure you want to clear the list?')) {
+      await api.poke({
+        app: 'scan',
+        mark: 'action',
+        json: { 'clear-guests': true }
+      })
+    }
   },
 }));
 

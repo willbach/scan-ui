@@ -1,5 +1,27 @@
 @use '../styles/colors.scss' as colors;
 
 .guest-list-view {
-  
+  align-items: center;
+
+  .guests {
+    width: 100%;
+    align-items: center;
+    height: calc(100vh - 150px);
+    margin-top: 16px;
+    max-width: 320px;
+  }
+
+  .ship {
+    max-width: 150px;
+  }
+
+  .trash {
+    padding: 2px;
+    margin-left: 12px;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
 }

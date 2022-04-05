@@ -1,19 +1,35 @@
 import React, { useState } from 'react'
-import Button from '../components/form/Button'
-import Form from '../components/form/Form'
-import Input from '../components/form/Input'
+import { QrReader } from 'react-qr-reader'
 import Container from '../components/spacing/Container'
-import Row from '../components/spacing/Row'
-import Text from '../components/text/Text'
 import useScanStore from '../store/scanStore'
-import { TokenBalance } from '../types/TokenBalance'
 
 import './VerifyView.scss'
 
 const VerifyView = () => {
+  const { verifyCode } = useScanStore()
+  const [data, setData] = useState('No data')
+
   return (
     <Container className='verify-view'>
       <h2>Verify Code</h2>
+      <QrReader
+        onResult={(result, error) => {
+          if (result) {
+            setData(result.getText())
+            const code = Number(result.getText())
+            if (code.toString() !== 'NaN') {
+              verifyCode(code);
+            } else {
+              console.warn('Not a number:', code);
+            }
+          } else if (error) {
+            console.warn(error);
+            setData(error.toString())
+          }
+        }}
+        constraints={{ facingMode: 'user' }}
+      />
+      <p>{data}</p>
     </Container>
   )
 }
