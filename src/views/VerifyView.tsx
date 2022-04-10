@@ -1,35 +1,42 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { QrReader } from 'react-qr-reader'
 import Container from '../components/spacing/Container'
+import Text from '../components/text/Text'
 import useScanStore from '../store/scanStore'
 
 import './VerifyView.scss'
 
 const VerifyView = () => {
-  const { verifyCode } = useScanStore()
-  const [data, setData] = useState('No data')
+  const { guestSuccess, verifyCode, setGuestSuccess } = useScanStore()
+  const [data, setData] = useState('')
+
+  useEffect(() => {
+    if (guestSuccess) {
+      setData('')
+      setTimeout(() => setGuestSuccess(undefined), 3000)
+    }
+  }, [guestSuccess, setGuestSuccess])
 
   return (
     <Container className='verify-view'>
       <h2>Verify Code</h2>
       <QrReader
+        videoId="code-reader"
+        containerStyle={{ height: 240, width: 320 }}
+        videoContainerStyle={{ height: 240, width: 320 }}
+        videoStyle={{ height: 240, width: 320 }}
         onResult={(result, error) => {
           if (result) {
-            setData(result.getText())
-            const code = Number(result.getText())
-            if (code.toString() !== 'NaN') {
-              verifyCode(code);
-            } else {
-              console.warn('Not a number:', code);
-            }
+            setData('Confirming...')
+            verifyCode(result.getText())
           } else if (error) {
-            console.warn(error);
-            setData(error.toString())
+            setData('Please focus on the QR code')
           }
         }}
         constraints={{ facingMode: 'user' }}
       />
       <p>{data}</p>
+      {guestSuccess && <Text>{guestSuccess}</Text>}
     </Container>
   )
 }

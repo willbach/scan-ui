@@ -2,4 +2,19 @@
 
 .code-view {
   align-items: center;
+
+  .uqbar-experience {
+    margin-top: 32px;
+
+    img {
+      height: 24px;
+      margin-right: 12px;
+    }
+
+    span {
+      color: colors.$uq-purple;
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
 }

@@ -10,6 +10,7 @@
     text-decoration: none;
     border-bottom: 2px solid rgba(colors.$uq-pink, 0);
     margin-bottom: -2px;
+    font-weight: 600;
 
     &.selected {
       border-bottom-color: colors.$uq-purple;
@@ -17,6 +18,7 @@
 
     &.logo {
       padding: 2px 4px;
+      margin: 0 12px 0 8px;
       img {
         height: 28px;
       }

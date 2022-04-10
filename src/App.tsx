@@ -5,6 +5,7 @@ import useScanStore from './store/scanStore';
 import GuestListView from './views/GuestListView';
 import CodeView from './views/CodeView';
 import VerifyView from './views/VerifyView';
+import { BASENAME } from './utils/constants';
 
 function App() {
   const { init } = useScanStore()
@@ -14,7 +15,7 @@ function App() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={BASENAME}>
       <Navbar />
       <Routes>
         <Route path="/" element={<CodeView />} />
