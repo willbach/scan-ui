@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { QrReader } from 'react-qr-reader'
+import { PalsPopup } from '../components/form/PalsPopup'
 import Container from '../components/spacing/Container'
 import Text from '../components/text/Text'
+import UqbarExperience from '../components/text/UqbarExperience'
 import useScanStore from '../store/scanStore'
 
 import './VerifyView.scss'
@@ -37,6 +39,8 @@ const VerifyView = () => {
       />
       <p>{data}</p>
       {guestSuccess && <Text>{guestSuccess}</Text>}
+      <PalsPopup />
+      <UqbarExperience style={{ marginTop: 16 }} />
     </Container>
   )
 }

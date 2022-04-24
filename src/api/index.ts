@@ -1,5 +1,5 @@
 import Urbit from "@urbit/http-api"
-const api = new Urbit("", "", "scan")
+const api = new Urbit("", "", "handshake")
 
 // @ts-ignore TODO window typings
 api.ship = window.ship

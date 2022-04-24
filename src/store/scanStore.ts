@@ -15,6 +15,8 @@ export interface ScanStore {
   expiresAt: Date | null,
   guestList: Guest[],
   guestSuccess?: string,
+  palsPopupShip: string,
+  showPalsPopup: boolean,
   setLoading: (loading: boolean) => void,
   init: () => Promise<void>,
   createCode: () => Promise<void>,
@@ -22,6 +24,8 @@ export interface ScanStore {
   setGuestList: (guestList: string[]) => Promise<void>,
   setGuestSuccess: (guestSuccess?: string) => void,
   clearGuestList: () => Promise<void>,
+  addPal: (ship: string, tags: string[]) => Promise<void>,
+  setPalsPopupShip: (palsPopupShip?: string) => void,
 }
 
 export function createSubscription(app: string, path: string, e: (data: any) => void): SubscriptionRequestInterface {
@@ -54,6 +58,8 @@ const useScanStore = create<ScanStore>((set, get) => ({
   code: null,
   expiresAt: null,
   guestList: [],
+  palsPopupShip: '',
+  showPalsPopup: false,
   setLoading: (loading) => set({ loading }),
   init: async () => {
     const handleSignerUpdate = ({ code, expires_at }: CodeData) => {
@@ -61,22 +67,27 @@ const useScanStore = create<ScanStore>((set, get) => ({
       set({ code, expiresAt })
     }
     const handleGuestListUpdate = (data: { [key: string]: boolean }) => {
-      // TODO figure out which guest was just confirmed
       const existingList = get().guestList
       const guestList = Object.keys(data)
         .map((ship) => ({ ship, confirmed: data[ship] }))
         .sort(sortGuests)
 
-      const { ship } = (guestList.find(({ ship, confirmed }) => existingList.find(e => e.ship === ship && confirmed !== e.confirmed)) || { ship: '' })
-      const guestSuccess = ship ? `${ship} confirmed!` : 'Already confirmed'
-      set({ guestList, guestSuccess })
+      const shipIsGuest = Boolean(guestList.find(({ ship, confirmed }) => existingList.find(e => e.ship === ship)))
+
+      if (shipIsGuest) {
+        const { ship } = (guestList.find(({ ship, confirmed }) => existingList.find(e => e.ship === ship && confirmed !== e.confirmed)) || { ship: '' })
+        const guestSuccess = ship ? `${ship} confirmed!` : 'Already confirmed'
+        set({ guestList, guestSuccess })
+      } else if (Object.keys(data)[0]) {
+        set({ palsPopupShip: Object.keys(data)[0], showPalsPopup: true })
+      }
     }
 
     api.subscribe(createSubscription('scan', '/signer-updates', handleSignerUpdate))
     api.subscribe(createSubscription('scan', '/reader-updates', handleGuestListUpdate))
 
     get().createCode()
-    set({ loading: false })
+    set({ loading: false, palsPopupShip: '~nev', showPalsPopup: true })
   },
   createCode: async () => {
     set({ loading: true })
@@ -111,6 +122,22 @@ const useScanStore = create<ScanStore>((set, get) => ({
         mark: 'action',
         json: { 'clear-guests': true }
       })
+    }
+  },
+  addPal: async (ship: string, tags = []) => {
+    await api.poke({
+      app: 'pals',
+      mark: 'pals-command',
+      json: {
+        meet: { ship, in: tags }
+      }
+    });
+  },
+  setPalsPopupShip: (palsPopupShip?: string) => {
+    if (palsPopupShip) {
+      set({ palsPopupShip, showPalsPopup: true })
+    } else {
+      set({ showPalsPopup: false })
     }
   },
 }));
