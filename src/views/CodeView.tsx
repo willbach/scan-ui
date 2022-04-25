@@ -41,19 +41,20 @@ const CodeView = () => {
   return (
     <Container className="code-view">
       <h2>~{window.ship}</h2>
+      <Text style={{ lineHeight: '1.5em', marginBottom: 16, textAlign: 'center' }}>
+        This code matches your Urbit ID and can be scanned <br /> by another handshake app using the Verify tab.
+      </Text>
       {code ? (
         <Col style={{ padding: 4, background: 'white', marginBottom: 24, alignItems: 'center' }}>
           <QRCode value={code} />
           {expiration(code, diff, loading)}
         </Col>
       ) : (
-        <Col>
-          <IoIosRefresh size={40} style={{ cursor: 'pointer' }} onClick={createCode} />
+        <Col style={{ height: 310, marginBottom: 24, alignItems: 'center', justifyContent: 'center' }}>
+          <Text>Loading...</Text>
         </Col>
       )}
-      {code && (
-        <IoIosRefresh size={40} style={{ cursor: 'pointer' }} onClick={createCode} />
-      )}
+      <IoIosRefresh size={32} style={{ cursor: 'pointer' }} onClick={createCode} />
       <UqbarExperience />
     </Container>
   )

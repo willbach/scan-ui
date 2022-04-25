@@ -3,14 +3,14 @@ import React, { useCallback, useEffect, useState } from 'react'
 import useDocketState from '../../store/docketStore'
 import { PALS_APP, PALS_HOST } from '../../utils/constants'
 import useScanStore from '../../store/scanStore'
-import Modal from '../popups/Modal'
+import Modal from './Modal'
 import Text from '../text/Text'
 import Col from '../spacing/Col'
 import Row from '../spacing/Row'
-import Button from './Button'
-import Loader from '../popups/Loader'
-import Form from './Form'
-import Input from './Input'
+import Button from '../form/Button'
+import Loader from './Loader'
+import Form from '../form/Form'
+import Input from '../form/Input'
 import api from '../../api'
 
 export const PalsPopup = () => {
@@ -49,15 +49,18 @@ export const PalsPopup = () => {
     }
   }, [setIsInstalling, setShowInstallModal, addAlly, requestTreaty, installDocket])
 
-  const submit = useCallback(async () => {
+  const submit = useCallback(async (e) => {
+    e.preventDefault()
+
     try {
       if (palsPopupShip) {
         await addPal(palsPopupShip, [tag || 'handshake'])
-        setPalsPopupShip()
-        setTag('')
       }
     } catch (e) {
       console.error(e)
+    } finally {
+      setPalsPopupShip()
+      setTag('')
     }
   }, [palsPopupShip, tag, addPal, setPalsPopupShip])
 
@@ -67,7 +70,7 @@ export const PalsPopup = () => {
         {isInstalling ? (
         <Row style={{ width: '80%' }}>
           <Loader />
-          <Text style={{ marginLeft: 8 }}>Installing...</Text>
+          <Text style={{ marginLeft: 16 }}>Installing...</Text>
         </Row>
       ) : (
           <Col style={{ borderRadius: 4, alignItems: 'center' }}>
@@ -75,7 +78,7 @@ export const PalsPopup = () => {
             <Text style={{ marginTop: 8, textAlign: 'center' }}>You do not have <Text mono>%pals</Text> installed,<br /> would you like to install it?</Text>
             <Row style={{ marginTop: 16 }}>
               <Button variant='dark' onClick={() => setShowInstallModal(false)} >Cancel</Button>
-              <Button style={{ marginLeft: 8 }} onClick={handleInstall}>Install</Button>
+              <Button style={{ marginLeft: 16 }} onClick={handleInstall}>Install</Button>
             </Row>
           </Col>
       )}

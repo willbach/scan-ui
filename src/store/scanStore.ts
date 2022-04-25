@@ -87,7 +87,7 @@ const useScanStore = create<ScanStore>((set, get) => ({
     api.subscribe(createSubscription('scan', '/reader-updates', handleGuestListUpdate))
 
     get().createCode()
-    set({ loading: false, palsPopupShip: '~nev', showPalsPopup: true })
+    set({ loading: false })
   },
   createCode: async () => {
     set({ loading: true })

@@ -3,6 +3,7 @@ import './Link.scss'
 
 interface LinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   href: string;
+  target?: string
 }
 
 const Link: React.FC<LinkProps> = (props) => {
